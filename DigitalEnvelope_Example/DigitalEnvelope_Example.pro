@@ -21,7 +21,7 @@ FORMS += \
     mainwindow.ui
 
 # Qt-Secret
-include($$PWD/submodules/Qt-Secret/src/Qt-Secret.pri)
+include($$PWD/../Qt-Secret/src/Qt-Secret.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
