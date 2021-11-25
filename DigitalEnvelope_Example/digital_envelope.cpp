@@ -7,6 +7,7 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include <cast128.h>
@@ -76,7 +77,6 @@ unique_ptr<Data> openEnvelope(unique_ptr<Envelope> envelope, Person& sender, Per
 
 QByteArray generateSessionKey()
 {
-    QRandomGenerator keyGen;
     QByteArray key;
     key.setNum(keyGen.generate64());
 
@@ -99,14 +99,14 @@ QByteArray encodeCAST128(QByteArray message, QByteArray key)
 
     // MSG to file
     {
-        std::ofstream toInFile(inFileKey);
+        std::ofstream toInFile(inFileKey, std::ofstream::out | std::ofstream::trunc);
         toInFile << message.toStdString();
         toInFile.close();
     }
 
     // Key to file
     {
-        std::ofstream toKeyFile(keyFileKey);
+        std::ofstream toKeyFile(keyFileKey, std::ofstream::out | std::ofstream::trunc);
         toKeyFile << key.toStdString();
         toKeyFile.close();
     }
@@ -118,8 +118,10 @@ QByteArray encodeCAST128(QByteArray message, QByteArray key)
 
         {
             std::ifstream fromOutFile(outFileKey);
-            std::string text {};
-            fromOutFile >> text;
+            std::stringstream buffer;
+            buffer << fromOutFile.rdbuf();
+            std::string text { buffer.str() };
+
             encodedText = QByteArray::fromStdString(text);
             fromOutFile.close();
         }
@@ -143,14 +145,14 @@ QByteArray decodeCAST128(QByteArray encodedText, QByteArray key)
 
     // EncodedText to file
     {
-        std::ofstream toInFile(inFileKey);
+        std::ofstream toInFile(inFileKey, std::ofstream::out | std::ofstream::trunc);
         toInFile << encodedText.toStdString();
         toInFile.close();
     }
 
     // Key to file
     {
-        std::ofstream toKeyFile(keyFileKey);
+        std::ofstream toKeyFile(keyFileKey, std::ofstream::out | std::ofstream::trunc);
         toKeyFile << key.toStdString();
         toKeyFile.close();
     }
@@ -158,12 +160,14 @@ QByteArray decodeCAST128(QByteArray encodedText, QByteArray key)
     try {
         Cast128::Key cast128Key;
         Cast128::readKey(keyFileKey, &cast128Key);
-        Cast128::decryptFile(outFileKey, outFileKey, cast128Key);
+        Cast128::decryptFile(inFileKey, outFileKey, cast128Key);
 
         {
             std::ifstream fromOutFile(outFileKey);
-            std::string text {};
-            fromOutFile >> text;
+            std::stringstream buffer;
+            buffer << fromOutFile.rdbuf();
+            std::string text { buffer.str() };
+
             message = QByteArray::fromStdString(text);
             fromOutFile.close();
         }

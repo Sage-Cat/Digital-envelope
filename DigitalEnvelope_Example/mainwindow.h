@@ -26,10 +26,6 @@ private slots:
 private:
     Ui::MainWindow* ui;
 
-    DigitalEnvelope::Person
-        _sender {},
-        _receiver {};
-
     DigitalEnvelope::Data _data;
     DigitalEnvelope::Envelope _envelope;
 };

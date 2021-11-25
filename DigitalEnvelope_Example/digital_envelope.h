@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <memory>
 
+#include <QRandomGenerator>
+
 using std::shared_ptr;
 using std::unique_ptr;
 
@@ -34,6 +36,8 @@ struct Data {
         receiver {};
     bool isCorrect {};
 };
+
+static QRandomGenerator keyGen;
 
 unique_ptr<Envelope> createEnvelope(unique_ptr<Data> data);
 unique_ptr<Data> openEnvelope(unique_ptr<Envelope> envelope, Person& sender, Person& receiver);

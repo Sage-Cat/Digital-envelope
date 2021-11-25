@@ -1,5 +1,7 @@
 #include "cast128.h"
 #include <bitset>
+#include <cstring>
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -7,8 +9,6 @@
 #include <random>
 #include <stdint.h>
 #include <vector>
-#include <cstring>
-#include <exception>
 
 static const uint64_t MOD_2_32 = uint64_t(2) << 31;
 static const bool ENCRYPT = false;
@@ -66,8 +66,8 @@ Cast128::uint* Cast128::generateKeys(const Cast128::Key key)
     Cast128::Key tmpKey = {};
     Cast128::Key originKey;
     std::memcpy(originKey, key, sizeof(Key));
-    Cast128::uint *keys = new Cast128::uint[keysCount];
-    for(int i = 0; i < keysCount; ++i)
+    Cast128::uint* keys = new Cast128::uint[keysCount];
+    for (int i = 0; i < keysCount; ++i)
         keys[i] = 0;
 
     for (int i = 0; i < 2; ++i) {
