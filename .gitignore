@@ -1,0 +1,16 @@
+# Qt/qmake build products and Qt Creator state
+build*/
+Makefile*
+.qmake.stash
+*.pro.user*
+*.o
+*.a
+*.so
+*.so.*
+moc_*.cpp
+ui_*.h
+
+# Files written by historical versions of the demo
+input.txt
+key.txt
+out.txt

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository and pinned submodules
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Install Qt build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y qt5-qmake qtbase5-dev
+
+      - name: Test CAST-128 against RFC 2144
+        run: |
+          c++ -std=c++17 -Wall -Wextra -Wpedantic -Werror \
+            -I DigitalEnvelope_Example tests/cast128_test.cpp \
+            DigitalEnvelope_Example/cast128.cpp -o cast128_test
+          ./cast128_test
+
+      - name: Build Qt application
+        run: |
+          mkdir -p build/application
+          cd build/application
+          qmake ../../main.pro
+          make -j2
+
+      - name: Build and run envelope tests
+        run: |
+          mkdir -p build/tests
+          cd build/tests
+          qmake ../../tests/DigitalEnvelope_Tests.pro
+          make -j2
+          env LD_LIBRARY_PATH="../../Qt-Secret/src/build/release:../../Qt-Secret/src/mini-gmp/src/build/release" \
+            ./DigitalEnvelope_Tests

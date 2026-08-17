@@ -2,19 +2,12 @@
 #define ENVELOPE_H
 
 #include <QByteArray>
-#include <cstdint>
 #include <memory>
-
-#include <QRandomGenerator>
 
 using std::shared_ptr;
 using std::unique_ptr;
 
 namespace DigitalEnvelope {
-typedef std::uint64_t uint;
-
-const size_t BIT_RATE = 64; // for session, pub and priv keys
-
 struct Envelope {
     QByteArray
         A {}, // Encrypted session key (RSA)
@@ -36,8 +29,6 @@ struct Data {
         receiver {};
     bool isCorrect {};
 };
-
-static QRandomGenerator keyGen;
 
 unique_ptr<Envelope> createEnvelope(unique_ptr<Data> data);
 unique_ptr<Data> openEnvelope(unique_ptr<Envelope> envelope, Person& sender, Person& receiver);

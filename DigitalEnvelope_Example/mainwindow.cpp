@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <exception>
+
 using namespace DigitalEnvelope;
 
 MainWindow::MainWindow(QWidget* parent)
@@ -8,8 +10,6 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    Q_ASSERT(DigitalEnvelope::testDigitalEnvelopeSystem());
 
     on_btn_clear_clicked();
 }
@@ -39,8 +39,12 @@ void MainWindow::on_btn_encrypt_clicked()
     data->message = ui->line_message->text().toUtf8();
     _data = *data;
 
-    // create envelope
-    _envelope = *createEnvelope(std::move(data));
+    try {
+        _envelope = *createEnvelope(std::move(data));
+    } catch (const std::exception& error) {
+        ui->text_result->setText("Encryption failed: " + QString::fromUtf8(error.what()));
+        return;
+    }
 
     // print out envelope
     ui->line_A->setText(QString::fromUtf8(_envelope.A.toHex()));
@@ -65,8 +69,12 @@ void MainWindow::on_btn_decrypt_clicked()
     envelope->B = QByteArray::fromHex(ui->line_B->text().toUtf8());
     envelope->C = QByteArray::fromHex(ui->line_C->text().toUtf8());
 
-    // Unpack envelope
-    _data = *openEnvelope(std::move(envelope), sender, receiver);
+    try {
+        _data = *openEnvelope(std::move(envelope), sender, receiver);
+    } catch (const std::exception& error) {
+        ui->text_result->setText("Decryption failed: " + QString::fromUtf8(error.what()));
+        return;
+    }
 
     QStringList result {
         "-- Resulting message --- \n " + _data.message,
